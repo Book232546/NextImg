@@ -1,0 +1,331 @@
+/* ============================================================
+   Navbar and gallery theme tokens
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
+:root,
+html.dark {
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
+
+  --color-bg: #09090b;
+  --color-surface: #18181b;
+  --color-surface-soft: rgba(255, 255, 255, 0.06);
+  --color-surface-soft-strong: rgba(255, 255, 255, 0.1);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-mid: rgba(255, 255, 255, 0.15);
+  --color-text: #ffffff;
+  --color-text-soft: rgba(255, 255, 255, 0.8);
+  --color-text-muted: rgba(255, 255, 255, 0.45);
+  --color-text-dim: rgba(255, 255, 255, 0.2);
+  --color-accent: #34d399;
+  --color-danger: #f87171;
+  --color-danger-bg: rgba(239, 68, 68, 0.1);
+  --shadow-dropdown: 0 20px 60px rgba(0, 0, 0, 0.65);
+  --shadow-nav: 0 2px 20px rgba(0, 0, 0, 0.45);
+}
+
+html.light {
+  --color-bg: #f7f7f5;
+  --color-surface: rgba(255, 255, 255, 0.92);
+  --color-surface-soft: rgba(15, 23, 42, 0.04);
+  --color-surface-soft-strong: rgba(15, 23, 42, 0.08);
+  --color-border: rgba(15, 23, 42, 0.12);
+  --color-border-mid: rgba(15, 23, 42, 0.22);
+  --color-text: #111827;
+  --color-text-soft: rgba(17, 24, 39, 0.82);
+  --color-text-muted: rgba(17, 24, 39, 0.56);
+  --color-text-dim: rgba(17, 24, 39, 0.28);
+  --color-accent: #10b981;
+  --color-danger: #dc2626;
+  --color-danger-bg: rgba(220, 38, 38, 0.08);
+  --shadow-dropdown: 0 18px 48px rgba(15, 23, 42, 0.12);
+  --shadow-nav: 0 2px 20px rgba(15, 23, 42, 0.08);
+}
+
+:root {
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-pill: 9999px;
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 500ms ease;
+}
+
+.gallery-root {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+  padding: 0 2rem;
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), color var(--transition-base);
+}
+
+.navbar--scrolled {
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-nav);
+}
+
+.navbar__logo {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.25rem;
+  color: var(--color-text);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: opacity var(--transition-fast);
+}
+
+.navbar__logo:hover {
+  opacity: 0.65;
+}
+
+.navbar__search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 22rem;
+  margin: 0 2.5rem;
+}
+
+.navbar__search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.navbar__search {
+  width: 100%;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 1rem 0.45rem 2.25rem;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  outline: none;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.navbar__search::placeholder {
+  color: var(--color-text-muted);
+}
+
+.navbar__search:focus {
+  background: var(--color-surface-soft-strong);
+  border-color: var(--color-border-mid);
+}
+
+.navbar__right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.navbar__upload {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  color: var(--color-text-soft);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.navbar__upload:hover {
+  color: var(--color-text);
+  background: var(--color-surface-soft-strong);
+  border-color: var(--color-border-mid);
+}
+
+.navbar__user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.navbar__user-btn:hover {
+  opacity: 0.8;
+}
+
+.navbar__avatar-wrap {
+  position: relative;
+}
+
+.navbar__avatar {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-border-mid);
+  transition: border-color var(--transition-fast);
+}
+
+.navbar__user-btn:hover .navbar__avatar {
+  border-color: var(--color-text-muted);
+}
+
+.navbar__online-dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  background: var(--color-accent);
+  border-radius: 50%;
+  border: 1.5px solid var(--color-bg);
+}
+
+.navbar__username {
+  font-size: 0.875rem;
+  color: var(--color-text-soft);
+}
+
+.navbar__chevron {
+  color: var(--color-text-dim);
+  transition: transform var(--transition-base);
+}
+
+.navbar__chevron--open {
+  transform: rotate(180deg);
+}
+
+.navbar__signin {
+  font-size: 0.875rem;
+  color: var(--color-text-soft);
+  text-decoration: none;
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 1rem;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.navbar__signin:hover {
+  color: var(--color-text);
+  background: var(--color-surface-soft);
+  border-color: var(--color-border-mid);
+}
+
+.navbar__dropdown {
+  position: absolute;
+  top: 3rem;
+  right: 0;
+  width: 14.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-dropdown);
+  overflow: hidden;
+  animation: dropdownIn var(--transition-fast) ease forwards;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar__dropdown-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar__dropdown-username {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.navbar__dropdown-section {
+  padding: 0.25rem 0;
+}
+
+.navbar__dropdown-section--danger {
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.navbar__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  color: var(--color-text-soft);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.navbar__dropdown-item:hover {
+  color: var(--color-text);
+  background: var(--color-surface-soft);
+}
+
+.navbar__dropdown-item--danger {
+  color: var(--color-danger);
+}
+
+.navbar__dropdown-item--danger:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+.navbar__theme-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.navbar__theme-status {
+  margin-top: 0.15rem;
+  font-size: 0.73rem;
+  color: var(--color-text-muted);
+}
