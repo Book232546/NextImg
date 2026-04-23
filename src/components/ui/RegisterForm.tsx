@@ -4,12 +4,15 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
+const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+
 export default function RegisterForm() {
   const router = useRouter()
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -28,6 +31,18 @@ export default function RegisterForm() {
     setLoading(true)
     setError("")
     setSuccess("")
+
+    if (!PASSWORD_RULE.test(form.password)) {
+      setError("Password must be at least 8 characters and include 1 uppercase letter and 1 number.")
+      setLoading(false)
+      return
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Confirm password must match the password field.")
+      setLoading(false)
+      return
+    }
 
     try {
       const res = await fetch("/api/register", {
@@ -147,7 +162,26 @@ export default function RegisterForm() {
             type="password"
             value={form.password}
             onChange={handleChange}
-            placeholder="Create a secure password"
+            placeholder="At least 8 chars, 1 uppercase, 1 number"
+            className="w-full rounded-2xl px-4 py-3 outline-none transition"
+            style={{
+              background: "var(--surface-muted)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+            }}
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium" style={{ color: "var(--color-text-soft)" }}>
+            Confirm Password
+          </span>
+          <input
+            name="confirmPassword"
+            type="password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            placeholder="Retype your password"
             className="w-full rounded-2xl px-4 py-3 outline-none transition"
             style={{
               background: "var(--surface-muted)",
@@ -157,6 +191,10 @@ export default function RegisterForm() {
           />
         </label>
       </div>
+
+      <p className="text-xs leading-6" style={{ color: "var(--color-text-muted)" }}>
+        Password requirements: at least 8 characters, 1 uppercase letter, and 1 number.
+      </p>
 
       <button
         type="submit"
