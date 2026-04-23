@@ -32,8 +32,8 @@ export default async function Home() {
           ) : (
             <>
               <span className="page-hero__label">Gallery</span>
-              <h1 className="page-hero__title">Lumière</h1>
-              <p className="page-hero__subtitle">A space for beautiful photography</p>
+              <h1 className="page-hero__title">NextImg</h1>
+              <p className="page-hero__subtitle">A space for drawing</p>
             </>
           )}
         </div>
