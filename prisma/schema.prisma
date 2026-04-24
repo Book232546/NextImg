@@ -26,6 +26,7 @@ model User {
   followers Follow[] @relation("UserFollowers")
   following Follow[] @relation("UserFollowing")
   likes     Like[]
+  comments  Comment[]
 }
 
 model Image {
@@ -40,6 +41,7 @@ model Image {
 
   tags Tag[]
   likes Like[]
+  comments Comment[]
 }
 
 model Tag {
@@ -74,5 +76,19 @@ model Like {
 
   @@unique([userId, imageId])
   @@index([imageId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  userId    String
+  imageId   String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@index([imageId, createdAt])
   @@index([userId])
 }

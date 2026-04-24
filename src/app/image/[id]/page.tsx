@@ -1,3 +1,4 @@
+import CommentSection from "@/components/ui/CommentSection"
 import DeleteButton from "@/components/ui/DeleteButton"
 import LikeButton from "@/components/ui/LikeButton"
 import { getCurrentUser } from "@/lib/getCurrentUser"
@@ -20,6 +21,18 @@ export default async function ImagePage(
     include: {
       user: true,
       tags: true,
+      comments: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              image: true,
+            },
+          },
+        },
+      },
     },
   })
 
@@ -54,6 +67,12 @@ export default async function ImagePage(
   const isOwner = currentUser?.id === image.userId
   const likeCount = toNumber(likeCountResult[0]?.count)
   const isLiked = toNumber(likedResult[0]?.count) > 0
+  const serializedComments = image.comments.map((comment) => ({
+    id: comment.id,
+    content: comment.content,
+    createdAt: comment.createdAt.toISOString(),
+    user: comment.user,
+  }))
 
   return (
     <section className="image-shell">
@@ -100,6 +119,16 @@ export default async function ImagePage(
                 )}
               </div>
             </div>
+
+            <CommentSection
+              imageId={image.id}
+              currentUser={currentUser ? {
+                id: currentUser.id,
+                username: currentUser.username,
+                image: currentUser.image ?? null,
+              } : null}
+              initialComments={serializedComments}
+            />
           </div>
         </article>
 
