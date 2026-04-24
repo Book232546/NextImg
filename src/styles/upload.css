@@ -1,35 +1,35 @@
-.register-shell {
+.upload-shell {
   position: relative;
   overflow: hidden;
   padding: 2.5rem 1rem;
 }
 
-.register-shell__glow {
+.upload-shell__glow {
   position: absolute;
   border-radius: 9999px;
   filter: blur(72px);
   pointer-events: none;
 }
 
-.register-shell__glow--left {
-  top: 3.5rem;
+.upload-shell__glow--left {
+  top: 4rem;
   left: 50%;
   width: 16rem;
   height: 16rem;
-  transform: translateX(-135%);
-  background: rgba(14, 165, 233, 0.12);
+  transform: translateX(-130%);
+  background: rgba(16, 185, 129, 0.12);
 }
 
-.register-shell__glow--right {
-  top: 8rem;
+.upload-shell__glow--right {
+  top: 7rem;
   right: 50%;
   width: 18rem;
   height: 18rem;
   transform: translateX(145%);
-  background: rgba(99, 102, 241, 0.12);
+  background: rgba(59, 130, 246, 0.09);
 }
 
-.register-layout {
+.upload-layout {
   position: relative;
   z-index: 1;
   display: grid;
@@ -40,25 +40,12 @@
   gap: 2.5rem;
 }
 
-.register-panel {
-  order: 2;
-  width: 100%;
-  max-width: 30rem;
-  margin: 0 auto;
-  border-radius: 2rem;
-  padding: 1.5rem;
-  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(18px);
+.upload-hero {
+  display: none;
 }
 
-.register-hero {
-  order: 1;
-}
-
-.register-hero__eyebrow,
-.register-form__badge {
+.upload-hero__eyebrow,
+.upload-form__badge {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
@@ -71,15 +58,15 @@
   color: var(--color-text-muted);
 }
 
-.register-hero__title {
+.upload-hero__title {
   max-width: 34rem;
   margin: 1.5rem 0 0;
-  font-size: clamp(2.35rem, 5vw, 4rem);
+  font-size: clamp(2.4rem, 5vw, 4rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
 }
 
-.register-hero__description {
+.upload-hero__description {
   max-width: 38rem;
   margin-top: 1.25rem;
   font-size: 1rem;
@@ -87,89 +74,103 @@
   color: var(--color-text-muted);
 }
 
-.register-hero__grid {
+.upload-hero__grid {
   display: grid;
   gap: 1rem;
   max-width: 38rem;
   margin-top: 2.5rem;
 }
 
-.register-hero__card {
+.upload-hero__card {
   border-radius: 1.5rem;
   padding: 1rem 1.25rem;
   background: var(--surface-muted);
   border: 1px solid var(--color-border);
 }
 
-.register-hero__card p {
+.upload-hero__card p {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 500;
 }
 
-.register-form {
+.upload-panel {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  border-radius: 2rem;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.upload-form {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.register-form__header {
+.upload-form__header {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.register-form__title {
+.upload-form__title {
   margin: 0;
   font-size: 2rem;
   line-height: 1.1;
   letter-spacing: -0.03em;
 }
 
-.register-form__subtitle {
+.upload-form__subtitle {
   margin: 0.5rem 0 0;
   font-size: 0.95rem;
   line-height: 1.7;
   color: var(--color-text-muted);
 }
 
-.register-form__message {
+.upload-form__message {
   border-radius: 1rem;
   padding: 0.9rem 1rem;
   font-size: 0.9rem;
 }
 
-.register-form__message--error {
+.upload-form__message--error {
   background: rgba(239, 68, 68, 0.10);
   border: 1px solid rgba(239, 68, 68, 0.24);
   color: #ef4444;
 }
 
-.register-form__message--success {
+.upload-form__message--success {
   background: rgba(16, 185, 129, 0.10);
   border: 1px solid rgba(16, 185, 129, 0.24);
   color: #059669;
 }
 
-.register-form__fields {
+.upload-form__fields {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.register-form__field {
+.upload-form__field {
   display: flex;
   flex-direction: column;
 }
 
-.register-form__label {
+.upload-form__label {
   margin-bottom: 0.5rem;
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--color-text-soft);
 }
 
-.register-form__input {
+.upload-form__input,
+.upload-form__textarea,
+.upload-form__file {
   width: 100%;
   box-sizing: border-box;
   border-radius: 1rem;
@@ -181,23 +182,81 @@
   color: var(--color-text);
 }
 
-.register-form__input::placeholder {
+.upload-form__textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.upload-form__input::placeholder,
+.upload-form__textarea::placeholder {
   color: var(--color-text-muted);
 }
 
-.register-form__input:focus {
+.upload-form__input:focus,
+.upload-form__textarea:focus,
+.upload-form__file:focus {
   border-color: var(--color-border-mid);
-  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
 }
 
-.register-form__hint {
-  margin: -0.15rem 0 0;
+.upload-form__tag-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+}
+
+.upload-form__tag-button {
+  border: none;
+  border-radius: 1rem;
+  padding: 0 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 180ms ease, opacity 180ms ease;
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+}
+
+.upload-form__tag-button:hover {
+  transform: translateY(-1px);
+}
+
+.upload-form__hint {
+  margin: 0.6rem 0 0;
   font-size: 0.8rem;
   line-height: 1.7;
   color: var(--color-text-muted);
 }
 
-.register-form__submit {
+.upload-form__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.upload-form__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 9999px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #059669;
+}
+
+.upload-form__tag-remove {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.upload-form__submit {
   width: 100%;
   border: none;
   border-radius: 1rem;
@@ -207,62 +266,41 @@
   color: #ffffff;
   cursor: pointer;
   transition: transform 180ms ease, opacity 180ms ease;
-  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.22);
 }
 
-.register-form__submit:hover:not(:disabled) {
+.upload-form__submit:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.register-form__submit:disabled {
+.upload-form__submit:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.register-form__footer {
-  margin: 0;
-  text-align: center;
-  font-size: 0.95rem;
-  color: var(--color-text-muted);
-}
-
-.register-form__link {
-  font-weight: 600;
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.register-form__link:hover {
-  text-decoration: underline;
-}
-
 @media (min-width: 640px) {
-  .register-shell {
+  .upload-shell {
     padding: 2.5rem 1.5rem;
   }
 
-  .register-panel {
+  .upload-panel {
     padding: 2rem;
   }
 }
 
 @media (min-width: 768px) {
-  .register-hero__grid {
+  .upload-hero__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
-  .register-layout {
-    grid-template-columns: 0.95fr 1.05fr;
+  .upload-layout {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .register-panel {
-    order: 1;
-  }
-
-  .register-hero {
-    order: 2;
+  .upload-hero {
+    display: block;
   }
 }

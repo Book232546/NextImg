@@ -69,148 +69,80 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="space-y-2">
-        <span
-          className="inline-flex rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.3em]"
-          style={{
-            background: "var(--surface-muted)",
-            border: "1px solid var(--color-border)",
-            color: "var(--color-text-muted)",
-          }}
-        >
-          Join NextImg
-        </span>
+    <form onSubmit={handleSubmit} className="register-form">
+      <div className="register-form__header">
+        <span className="register-form__badge">Join NextImg</span>
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Create account</h1>
-          <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+          <h1 className="register-form__title">Create account</h1>
+          <p className="register-form__subtitle">
             Save your favorite work, upload new shots, and build your profile.
           </p>
         </div>
       </div>
 
-      {error && (
-        <div
-          className="rounded-2xl px-4 py-3 text-sm"
-          style={{
-            background: "rgba(239, 68, 68, 0.10)",
-            border: "1px solid rgba(239, 68, 68, 0.24)",
-            color: "#ef4444",
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="register-form__message register-form__message--error">{error}</div>}
+      {success && <div className="register-form__message register-form__message--success">{success}</div>}
 
-      {success && (
-        <div
-          className="rounded-2xl px-4 py-3 text-sm"
-          style={{
-            background: "rgba(16, 185, 129, 0.10)",
-            border: "1px solid rgba(16, 185, 129, 0.24)",
-            color: "#059669",
-          }}
-        >
-          {success}
-        </div>
-      )}
-
-      <div className="space-y-4">
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium" style={{ color: "var(--color-text-soft)" }}>
-            Username
-          </span>
+      <div className="register-form__fields">
+        <label className="register-form__field">
+          <span className="register-form__label">Username</span>
           <input
             name="username"
             value={form.username}
             onChange={handleChange}
             placeholder="yourname"
-            className="w-full rounded-2xl px-4 py-3 outline-none transition"
-            style={{
-              background: "var(--surface-muted)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
+            className="register-form__input"
           />
         </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium" style={{ color: "var(--color-text-soft)" }}>
-            Email
-          </span>
+        <label className="register-form__field">
+          <span className="register-form__label">Email</span>
           <input
             name="email"
             type="email"
             value={form.email}
             onChange={handleChange}
             placeholder="yourname@example.com"
-            className="w-full rounded-2xl px-4 py-3 outline-none transition"
-            style={{
-              background: "var(--surface-muted)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
+            className="register-form__input"
           />
         </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium" style={{ color: "var(--color-text-soft)" }}>
-            Password
-          </span>
+        <label className="register-form__field">
+          <span className="register-form__label">Password</span>
           <input
             name="password"
             type="password"
             value={form.password}
             onChange={handleChange}
             placeholder="At least 8 chars, 1 uppercase, 1 number"
-            className="w-full rounded-2xl px-4 py-3 outline-none transition"
-            style={{
-              background: "var(--surface-muted)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
+            className="register-form__input"
           />
         </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium" style={{ color: "var(--color-text-soft)" }}>
-            Confirm Password
-          </span>
+        <label className="register-form__field">
+          <span className="register-form__label">Confirm Password</span>
           <input
             name="confirmPassword"
             type="password"
             value={form.confirmPassword}
             onChange={handleChange}
             placeholder="Retype your password"
-            className="w-full rounded-2xl px-4 py-3 outline-none transition"
-            style={{
-              background: "var(--surface-muted)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
+            className="register-form__input"
           />
         </label>
       </div>
 
-      <p className="text-xs leading-6" style={{ color: "var(--color-text-muted)" }}>
+      <p className="register-form__hint">
         Password requirements: at least 8 characters, 1 uppercase letter, and 1 number.
       </p>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-        style={{
-          background: "linear-gradient(135deg, #0f172a 0%, #334155 100%)",
-          boxShadow: "0 20px 40px rgba(15, 23, 42, 0.16)",
-        }}
-      >
+      <button type="submit" disabled={loading} className="register-form__submit">
         {loading ? "Creating account..." : "Create Account"}
       </button>
 
-      <p className="text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
+      <p className="register-form__footer">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium" style={{ color: "var(--color-text)" }}>
+        <Link href="/login" className="register-form__link">
           Sign in here
         </Link>
       </p>

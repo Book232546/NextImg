@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const userId = cookieStore.get("userId")?.value;
 
     if (!userId) {
-      return Response.json({ error: "กรุณาเข้าสู่ระบบก่อนอัปโหลด" }, { status: 401 });
+      return Response.json({ error: "Please sign in before uploading." }, { status: 401 });
     }
 
     const formData = await req.formData();
@@ -47,11 +47,15 @@ export async function POST(req: Request) {
     const tagList = parseTags(formData.get("tags"));
 
     if (!(file instanceof File)) {
-      return Response.json({ error: "ไม่พบไฟล์รูปภาพ" }, { status: 400 });
+      return Response.json({ error: "Please choose an image file." }, { status: 400 });
     }
 
     if (!title) {
-      return Response.json({ error: "กรุณาใส่ชื่อรูปภาพ" }, { status: 400 });
+      return Response.json({ error: "Please enter an image title." }, { status: 400 });
+    }
+
+    if (tagList.length === 0) {
+      return Response.json({ error: "Please add at least 1 tag before uploading." }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -82,14 +86,12 @@ export async function POST(req: Request) {
         description,
         imageUrl: upload.secure_url,
         userId,
-        ...(tagList.length > 0 && {
-          tags: {
-            connectOrCreate: tagList.map((tag) => ({
-              where: { name: tag },
-              create: { name: tag },
-            })),
-          },
-        }),
+        tags: {
+          connectOrCreate: tagList.map((tag) => ({
+            where: { name: tag },
+            create: { name: tag },
+          })),
+        },
       },
     });
 
@@ -98,7 +100,7 @@ export async function POST(req: Request) {
     console.error("Upload API error:", error);
 
     const message =
-      error instanceof Error ? error.message : "เกิดข้อผิดพลาดระหว่างอัปโหลด";
+      error instanceof Error ? error.message : "An error occurred while uploading.";
 
     return Response.json({ error: message }, { status: 500 });
   }

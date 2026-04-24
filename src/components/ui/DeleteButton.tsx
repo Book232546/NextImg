@@ -2,7 +2,13 @@
 
 import { useRouter } from "next/navigation"
 
-export default function DeleteButton({ imageId }: { imageId: string }) {
+export default function DeleteButton({
+  imageId,
+  className,
+}: {
+  imageId: string
+  className?: string
+}) {
   const router = useRouter()
 
   const handleDelete = async () => {
@@ -19,7 +25,7 @@ export default function DeleteButton({ imageId }: { imageId: string }) {
   return (
     <button
       onClick={handleDelete}
-      className="bg-red-500 text-white px-4 py-2 rounded mt-4"
+      className={className ?? "bg-red-500 text-white px-4 py-2 rounded mt-4"}
     >
       Delete
     </button>
