@@ -159,7 +159,6 @@ export default function UploadForm() {
           <span className="upload-form__label">Image Title</span>
           <input
             type="text"
-            placeholder="Evening light over the city"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="upload-form__input"
@@ -169,7 +168,6 @@ export default function UploadForm() {
         <label className="upload-form__field">
           <span className="upload-form__label">Description</span>
           <textarea
-            placeholder="Share context, mood, or the story behind this image."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="upload-form__textarea"
