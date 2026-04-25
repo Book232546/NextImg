@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { COUNTRIES, GENDER_OPTIONS } from "@/lib/countries"
 
 const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{8,}$/
 
@@ -13,12 +14,17 @@ export default function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    birthDate: "",
+    gender: "PREFER_NOT_TO_SAY",
+    country: "",
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target
     setForm((prev) => ({
       ...prev,
@@ -40,6 +46,12 @@ export default function RegisterForm() {
 
     if (form.password !== form.confirmPassword) {
       setError("Confirm password must match the password field.")
+      setLoading(false)
+      return
+    }
+
+    if (!form.birthDate || !form.country.trim()) {
+      setError("Birth date and country are required.")
       setLoading(false)
       return
     }
@@ -105,6 +117,52 @@ export default function RegisterForm() {
             placeholder="yourname@example.com"
             className="register-form__input"
           />
+        </label>
+
+        <div className="register-form__grid">
+          <label className="register-form__field">
+            <span className="register-form__label">Birth Date</span>
+            <input
+              name="birthDate"
+              type="date"
+              value={form.birthDate}
+              onChange={handleChange}
+              className="register-form__input"
+            />
+          </label>
+
+          <label className="register-form__field">
+            <span className="register-form__label">Gender</span>
+            <select
+              name="gender"
+              value={form.gender}
+              onChange={handleChange}
+              className="register-form__input register-form__select"
+            >
+              {GENDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <label className="register-form__field">
+          <span className="register-form__label">Country</span>
+          <input
+            name="country"
+            value={form.country}
+            onChange={handleChange}
+            placeholder="Type to search your country"
+            className="register-form__input"
+            list="country-options"
+          />
+          <datalist id="country-options">
+            {COUNTRIES.map((country) => (
+              <option key={country} value={country} />
+            ))}
+          </datalist>
         </label>
 
         <label className="register-form__field">

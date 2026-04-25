@@ -12,12 +12,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
 model User {
   id        String   @id @default(uuid())
   username  String   @unique
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+  birthDate DateTime?
+  gender    Gender   @default(PREFER_NOT_TO_SAY)
+  country   String?
 
   image      String?
   bio        String?

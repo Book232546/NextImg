@@ -157,6 +157,11 @@
   gap: 1rem;
 }
 
+.register-form__grid {
+  display: grid;
+  gap: 1rem;
+}
+
 .register-form__field {
   display: flex;
   flex-direction: column;
@@ -178,6 +183,17 @@
   transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
   background: var(--surface-muted);
   border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.register-form__select {
+  appearance: none;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.register-form__select option {
+  background-color: var(--color-surface);
   color: var(--color-text);
 }
 
@@ -249,6 +265,10 @@
 
 @media (min-width: 768px) {
   .register-hero__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .register-form__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
