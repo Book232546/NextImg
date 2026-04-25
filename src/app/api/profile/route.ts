@@ -1,7 +1,11 @@
 import cloudinary from "@/lib/cloudinary"
+import { COUNTRIES } from "@/lib/countries"
 import { getCurrentUser } from "@/lib/getCurrentUser"
-import { prisma } from "@/lib/prisma"
+import { findUserIdByUsername, updateUserProfile } from "@/lib/userProfile"
 import type { UploadApiResponse } from "cloudinary"
+
+const GENDERS = new Set(["MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"])
+const COUNTRY_LOOKUP = new Map(COUNTRIES.map((country) => [country.toLowerCase(), country]))
 
 export async function PATCH(req: Request) {
   try {
@@ -15,12 +19,24 @@ export async function PATCH(req: Request) {
     let username = ""
     let bio = ""
     let image = ""
+    let birthDateValue = ""
+    let gender = "PREFER_NOT_TO_SAY"
+    let country = ""
+    let showBirthDate = true
+    let showGender = true
+    let showCountry = true
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData()
       username = String(formData.get("username") ?? "").trim()
       bio = String(formData.get("bio") ?? "").trim()
       image = String(formData.get("image") ?? "").trim()
+      birthDateValue = String(formData.get("birthDate") ?? "").trim()
+      gender = String(formData.get("gender") ?? "PREFER_NOT_TO_SAY").trim()
+      country = String(formData.get("country") ?? "").trim()
+      showBirthDate = String(formData.get("showBirthDate") ?? "false") === "true"
+      showGender = String(formData.get("showGender") ?? "false") === "true"
+      showCountry = String(formData.get("showCountry") ?? "false") === "true"
 
       const file = formData.get("avatar")
 
@@ -54,41 +70,64 @@ export async function PATCH(req: Request) {
       username = String(body.username ?? "").trim()
       bio = String(body.bio ?? "").trim()
       image = String(body.image ?? "").trim()
+      birthDateValue = String(body.birthDate ?? "").trim()
+      gender = String(body.gender ?? "PREFER_NOT_TO_SAY").trim()
+      country = String(body.country ?? "").trim()
+      showBirthDate = Boolean(body.showBirthDate)
+      showGender = Boolean(body.showGender)
+      showCountry = Boolean(body.showCountry)
     }
 
     if (!username) {
       return Response.json({ error: "Username is required." }, { status: 400 })
     }
 
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        username,
-        NOT: { id: currentUser.id },
-      },
-    })
+    if (!gender || !GENDERS.has(gender)) {
+      return Response.json({ error: "Selected gender is invalid." }, { status: 400 })
+    }
 
-    if (existingUser) {
+    const normalizedCountry = country ? COUNTRY_LOOKUP.get(country.toLowerCase()) ?? null : null
+
+    if (country && !normalizedCountry) {
+      return Response.json({ error: "Selected country is invalid." }, { status: 400 })
+    }
+
+    let birthDate: Date | null = null
+    if (birthDateValue) {
+      birthDate = new Date(birthDateValue)
+      if (Number.isNaN(birthDate.getTime())) {
+        return Response.json({ error: "Birth date is invalid." }, { status: 400 })
+      }
+    }
+
+    const existingUserId = await findUserIdByUsername(username, currentUser.id)
+
+    if (existingUserId) {
       return Response.json({ error: "This username is already taken." }, { status: 409 })
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: currentUser.id },
-      data: {
-        username,
-        bio: bio || null,
-        image: image || null,
-      },
-      select: {
-        id: true,
-        username: true,
-        bio: true,
-        image: true,
-      },
+    const updatedUser = await updateUserProfile({
+      userId: currentUser.id,
+      username,
+      bio: bio || null,
+      image: image || null,
+      birthDate,
+      gender: gender as "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY",
+      country: normalizedCountry,
+      showBirthDate,
+      showGender,
+      showCountry,
     })
+
+    if (!updatedUser) {
+      return Response.json({ error: "User not found." }, { status: 404 })
+    }
 
     return Response.json(updatedUser)
   } catch (error) {
     console.error("Profile API error:", error)
-    return Response.json({ error: "Unable to update profile right now." }, { status: 500 })
+    const message =
+      error instanceof Error ? error.message : "Unable to update profile right now."
+    return Response.json({ error: message }, { status: 500 })
   }
 }

@@ -28,6 +28,9 @@ model User {
   birthDate DateTime?
   gender    Gender   @default(PREFER_NOT_TO_SAY)
   country   String?
+  showBirthDate Boolean @default(true)
+  showGender    Boolean @default(true)
+  showCountry   Boolean @default(true)
 
   image      String?
   bio        String?

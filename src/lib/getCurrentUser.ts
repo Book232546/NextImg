@@ -1,5 +1,5 @@
 import { cookies } from "next/headers"
-import { prisma } from "./prisma"
+import { getUserProfileById } from "./userProfile"
 
 export async function getCurrentUser() {
   const cookieStore = await cookies()
@@ -7,7 +7,5 @@ export async function getCurrentUser() {
 
   if (!userId) return null
 
-  return prisma.user.findUnique({
-    where: { id: userId }
-  })
+  return getUserProfileById(userId)
 }

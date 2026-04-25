@@ -99,6 +99,32 @@
   gap: 0.9rem;
 }
 
+.profile-details {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.profile-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: baseline;
+}
+
+.profile-detail__label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-muted);
+}
+
+.profile-detail__value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
 .profile-stat {
   border-radius: 1.35rem;
   padding: 1rem;
@@ -298,6 +324,11 @@
   flex-direction: column;
 }
 
+.profile-edit-form__grid {
+  display: grid;
+  gap: 1rem;
+}
+
 .profile-edit-form__avatar-block {
   display: grid;
   gap: 1rem;
@@ -318,6 +349,19 @@
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--color-text-soft);
+}
+
+.profile-edit-form__section {
+  padding-top: 0.2rem;
+}
+
+.profile-edit-form__section-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .profile-edit-form__input,
@@ -342,6 +386,17 @@
   padding: 0.8rem 1rem;
 }
 
+.profile-edit-form__select {
+  appearance: none;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.profile-edit-form__select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
 .profile-edit-form__input::placeholder,
 .profile-edit-form__textarea::placeholder {
   color: var(--color-text-muted);
@@ -357,6 +412,28 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.85rem;
+}
+
+.profile-edit-form__privacy-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.profile-edit-form__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  background: var(--surface-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.profile-edit-form__toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #10b981;
 }
 
 .profile-edit-form__cancel,
@@ -410,6 +487,10 @@
 
   .profile-edit-form__avatar-block {
     grid-template-columns: auto 1fr;
+  }
+
+  .profile-edit-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profile-edit-form__actions {

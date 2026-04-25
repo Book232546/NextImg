@@ -119,6 +119,10 @@ export default function RegisterForm() {
           />
         </label>
 
+        <div className="register-form__section">
+          <p className="register-form__section-title">Personal Details</p>
+        </div>
+
         <div className="register-form__grid">
           <label className="register-form__field">
             <span className="register-form__label">Birth Date</span>

@@ -1,14 +1,21 @@
 "use client"
 
+import { COUNTRIES, GENDER_OPTIONS } from "@/lib/countries"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 type EditProfileFormProps = {
   userId: string
   initialUsername: string
   initialBio: string
   initialImage: string
+  initialBirthDate: string
+  initialGender: string
+  initialCountry: string
+  initialShowBirthDate: boolean
+  initialShowGender: boolean
+  initialShowCountry: boolean
 }
 
 export default function EditProfileForm({
@@ -16,35 +23,60 @@ export default function EditProfileForm({
   initialUsername,
   initialBio,
   initialImage,
+  initialBirthDate,
+  initialGender,
+  initialCountry,
+  initialShowBirthDate,
+  initialShowGender,
+  initialShowCountry,
 }: EditProfileFormProps) {
   const router = useRouter()
   const [username, setUsername] = useState(initialUsername)
   const [bio, setBio] = useState(initialBio)
   const [image, setImage] = useState(initialImage)
+  const [birthDate, setBirthDate] = useState(initialBirthDate)
+  const [gender, setGender] = useState(initialGender || "PREFER_NOT_TO_SAY")
+  const [country, setCountry] = useState(initialCountry)
+  const [showBirthDate, setShowBirthDate] = useState(Boolean(initialShowBirthDate))
+  const [showGender, setShowGender] = useState(Boolean(initialShowGender))
+  const [showCountry, setShowCountry] = useState(Boolean(initialShowCountry))
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
 
-  const previewImage = useMemo(() => {
-    if (avatarFile) {
-      return URL.createObjectURL(avatarFile)
+  useEffect(() => {
+    if (!avatarFile) {
+      setPreviewUrl(null)
+      return
     }
 
-    return image || "/default-avatar.svg"
-  }, [avatarFile, image])
+    const objectUrl = URL.createObjectURL(avatarFile)
+    setPreviewUrl(objectUrl)
+
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [avatarFile])
+
+  const previewImage = useMemo(() => {
+    return previewUrl || image || "/default-avatar.svg"
+  }, [previewUrl, image])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
-    setSuccess("")
 
     try {
       const formData = new FormData()
       formData.append("username", username)
       formData.append("bio", bio)
       formData.append("image", image)
+      formData.append("birthDate", birthDate)
+      formData.append("gender", gender)
+      formData.append("country", country)
+      formData.append("showBirthDate", String(showBirthDate))
+      formData.append("showGender", String(showGender))
+      formData.append("showCountry", String(showCountry))
 
       if (avatarFile) {
         formData.append("avatar", avatarFile)
@@ -63,7 +95,7 @@ export default function EditProfileForm({
 
       setImage(data.image ?? "")
       setAvatarFile(null)
-      setSuccess("Profile updated successfully.")
+      router.push(`/profile/${userId}`)
       router.refresh()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred")
@@ -78,12 +110,11 @@ export default function EditProfileForm({
         <span className="profile-edit-form__badge">Owner Only</span>
         <h1 className="profile-edit-form__title">Edit profile</h1>
         <p className="profile-edit-form__subtitle">
-          Update your name, avatar, and bio. This screen is only available to the owner of the profile.
+          Update your profile details and choose which personal information other people are allowed to see.
         </p>
       </div>
 
       {error && <div className="profile-edit-form__message profile-edit-form__message--error">{error}</div>}
-      {success && <div className="profile-edit-form__message profile-edit-form__message--success">{success}</div>}
 
       <div className="profile-edit-form__avatar-block">
         <img src={previewImage} alt={username || "Profile preview"} className="profile-edit-form__avatar-preview" />
@@ -118,6 +149,86 @@ export default function EditProfileForm({
           placeholder="Tell people a bit about your work."
         />
       </label>
+
+      <div className="profile-edit-form__section">
+        <p className="profile-edit-form__section-title">Personal Details</p>
+      </div>
+
+      <div className="profile-edit-form__grid">
+        <label className="profile-edit-form__field">
+          <span className="profile-edit-form__label">Birth Date</span>
+          <input
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            className="profile-edit-form__input"
+          />
+        </label>
+
+        <label className="profile-edit-form__field">
+          <span className="profile-edit-form__label">Gender</span>
+          <select
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            className="profile-edit-form__input profile-edit-form__select"
+          >
+            {GENDER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <label className="profile-edit-form__field">
+        <span className="profile-edit-form__label">Country</span>
+        <input
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="profile-edit-form__input"
+          placeholder="Type to search your country"
+          list="edit-country-options"
+        />
+        <datalist id="edit-country-options">
+          {COUNTRIES.map((item) => (
+            <option key={item} value={item} />
+          ))}
+        </datalist>
+      </label>
+
+      <div className="profile-edit-form__section">
+        <p className="profile-edit-form__section-title">Privacy</p>
+      </div>
+
+      <div className="profile-edit-form__privacy-list">
+        <label className="profile-edit-form__toggle">
+          <input
+            type="checkbox"
+            checked={showBirthDate}
+            onChange={(e) => setShowBirthDate(e.target.checked)}
+          />
+          <span>Show birth date to other users</span>
+        </label>
+
+        <label className="profile-edit-form__toggle">
+          <input
+            type="checkbox"
+            checked={showGender}
+            onChange={(e) => setShowGender(e.target.checked)}
+          />
+          <span>Show gender to other users</span>
+        </label>
+
+        <label className="profile-edit-form__toggle">
+          <input
+            type="checkbox"
+            checked={showCountry}
+            onChange={(e) => setShowCountry(e.target.checked)}
+          />
+          <span>Show country to other users</span>
+        </label>
+      </div>
 
       <div className="profile-edit-form__actions">
         <Link href={`/profile/${userId}`} className="profile-edit-form__cancel">

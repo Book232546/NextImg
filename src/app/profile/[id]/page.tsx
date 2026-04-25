@@ -1,4 +1,6 @@
 import { getCurrentUser } from "@/lib/getCurrentUser"
+import { GENDER_OPTIONS } from "@/lib/countries"
+import { getUserProfileById } from "@/lib/userProfile"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import "@/styles/profile.css"
@@ -19,15 +21,12 @@ export default async function ProfilePage(
 ) {
   const { id } = await params
 
-  const [currentUser, user, followersCount, followingCount] = await Promise.all([
+  const [currentUser, user, images, followersCount, followingCount] = await Promise.all([
     getCurrentUser(),
-    prisma.user.findUnique({
-      where: { id },
-      include: {
-        images: {
-          orderBy: { createdAt: "desc" },
-        },
-      },
+    getUserProfileById(id),
+    prisma.image.findMany({
+      where: { userId: id },
+      orderBy: { createdAt: "desc" },
     }),
     getFollowCount("followingId", id),
     getFollowCount("followerId", id),
@@ -38,6 +37,31 @@ export default async function ProfilePage(
   }
 
   const isOwner = currentUser?.id === user.id
+  const genderLabel =
+    GENDER_OPTIONS.find((item) => item.value === user.gender)?.label ?? user.gender
+  const personalItems = [
+    {
+      label: "Birth Date",
+      value: user.birthDate
+        ? new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }).format(new Date(user.birthDate))
+        : null,
+      visible: isOwner || user.showBirthDate,
+    },
+    {
+      label: "Gender",
+      value: genderLabel,
+      visible: isOwner || user.showGender,
+    },
+    {
+      label: "Country",
+      value: user.country,
+      visible: isOwner || user.showCountry,
+    },
+  ].filter((item) => item.visible && item.value)
 
   return (
     <section className="profile-shell">
@@ -61,7 +85,7 @@ export default async function ProfilePage(
 
                 <div className="profile-stats">
                   <div className="profile-stat">
-                    <span className="profile-stat__value">{user.images.length}</span>
+                    <span className="profile-stat__value">{images.length}</span>
                     <span className="profile-stat__label">Posts</span>
                   </div>
                   <div className="profile-stat">
@@ -73,6 +97,17 @@ export default async function ProfilePage(
                     <span className="profile-stat__label">Following</span>
                   </div>
                 </div>
+
+                {personalItems.length > 0 && (
+                  <div className="profile-details">
+                    {personalItems.map((item) => (
+                      <div key={item.label} className="profile-detail">
+                        <span className="profile-detail__label">{item.label}</span>
+                        <span className="profile-detail__value">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -95,13 +130,13 @@ export default async function ProfilePage(
               </div>
             </div>
 
-            {user.images.length === 0 ? (
+            {images.length === 0 ? (
               <div className="profile-empty">
                 <p>No images uploaded yet.</p>
               </div>
             ) : (
               <div className="profile-gallery__grid">
-                {user.images.map((img) => (
+                {images.map((img) => (
                   <Link key={img.id} href={`/image/${img.id}`} className="profile-gallery__link">
                     <img
                       src={img.imageUrl}

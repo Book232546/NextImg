@@ -22,6 +22,12 @@ export default async function EditProfilePage() {
             initialUsername={currentUser.username}
             initialBio={currentUser.bio ?? ""}
             initialImage={currentUser.image ?? ""}
+            initialBirthDate={currentUser.birthDate ? new Date(currentUser.birthDate).toISOString().slice(0, 10) : ""}
+            initialGender={currentUser.gender ?? "PREFER_NOT_TO_SAY"}
+            initialCountry={currentUser.country ?? ""}
+            initialShowBirthDate={currentUser.showBirthDate ?? true}
+            initialShowGender={currentUser.showGender ?? true}
+            initialShowCountry={currentUser.showCountry ?? true}
           />
         </div>
       </div>
