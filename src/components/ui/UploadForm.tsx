@@ -1,16 +1,75 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+const MAX_IMAGE_DIMENSION = 1600;
+const OUTPUT_QUALITY = 0.82;
+
+async function optimizeImageFile(file: File) {
+  if (
+    !file.type.startsWith("image/") ||
+    file.type === "image/gif" ||
+    file.type === "image/svg+xml"
+  ) {
+    return file;
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Unable to process the selected image."));
+      img.src = objectUrl;
+    });
+
+    const longestSide = Math.max(image.width, image.height);
+    const scale =
+      longestSide > MAX_IMAGE_DIMENSION ? MAX_IMAGE_DIMENSION / longestSide : 1;
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return file;
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    const optimizedBlob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/webp", OUTPUT_QUALITY);
+    });
+
+    if (!optimizedBlob || optimizedBlob.size >= file.size) {
+      return file;
+    }
+
+    const optimizedName = file.name.replace(/\.[^.]+$/, "") || "upload";
+    return new File([optimizedBlob], `${optimizedName}.webp`, {
+      type: "image/webp",
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export default function UploadForm() {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const addTag = () => {
     const trimmed = tagsInput.trim();
@@ -30,7 +89,6 @@ export default function UploadForm() {
 
   const handleUpload = async () => {
     setError("");
-    setSuccess("");
 
     if (!title.trim()) {
       setError("Please enter an image title.");
@@ -47,18 +105,22 @@ export default function UploadForm() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("title", title.trim());
-    formData.append("description", description.trim());
-    formData.append("tags", JSON.stringify(tags));
-    formData.append("file", file);
-
     try {
       setUploading(true);
+      setProcessing(true);
+      const optimizedFile = await optimizeImageFile(file);
+      setProcessing(false);
 
       const res = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        body: (() => {
+          const nextFormData = new FormData();
+          nextFormData.append("title", title.trim());
+          nextFormData.append("description", description.trim());
+          nextFormData.append("tags", JSON.stringify(tags));
+          nextFormData.append("file", optimizedFile);
+          return nextFormData;
+        })(),
       });
 
       const data = await res.json();
@@ -67,16 +129,13 @@ export default function UploadForm() {
         throw new Error(data.error || "Upload failed");
       }
 
-      setSuccess("Image uploaded successfully.");
-      setTitle("");
-      setDescription("");
-      setTagsInput("");
-      setTags([]);
-      setFile(null);
+      router.push(`/image/${data.id}`);
+      router.refresh();
     } catch (err: unknown) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Upload error");
     } finally {
+      setProcessing(false);
       setUploading(false);
     }
   };
@@ -94,7 +153,6 @@ export default function UploadForm() {
       </div>
 
       {error && <div className="upload-form__message upload-form__message--error">{error}</div>}
-      {success && <div className="upload-form__message upload-form__message--success">{success}</div>}
 
       <div className="upload-form__fields">
         <label className="upload-form__field">
@@ -173,10 +231,10 @@ export default function UploadForm() {
       <button
         type="button"
         onClick={handleUpload}
-        disabled={uploading}
+        disabled={uploading || processing}
         className="upload-form__submit"
       >
-        {uploading ? "Uploading..." : "Upload Image"}
+        {processing ? "Optimizing image..." : uploading ? "Uploading..." : "Upload Image"}
       </button>
     </div>
   );
