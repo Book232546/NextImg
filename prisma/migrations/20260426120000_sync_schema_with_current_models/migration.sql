@@ -1,9 +1,6 @@
 -- CreateEnum
 CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY');
 
--- CreateEnum
-CREATE TYPE "LinkPlatform" AS ENUM ('FACEBOOK', 'INSTAGRAM', 'X', 'PATREON', 'KOFI', 'OTHER');
-
 -- AlterTable
 ALTER TABLE "User"
 ADD COLUMN "birthDate" TIMESTAMP(3),
@@ -12,19 +9,6 @@ ADD COLUMN "gender" "Gender" NOT NULL DEFAULT 'PREFER_NOT_TO_SAY',
 ADD COLUMN "showBirthDate" BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN "showCountry" BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN "showGender" BOOLEAN NOT NULL DEFAULT true;
-
--- CreateTable
-CREATE TABLE "ProfileLink" (
-    "id" TEXT NOT NULL,
-    "platform" "LinkPlatform" NOT NULL,
-    "label" TEXT,
-    "url" TEXT NOT NULL,
-    "sortOrder" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT NOT NULL,
-
-    CONSTRAINT "ProfileLink_pkey" PRIMARY KEY ("id")
-);
 
 -- CreateTable
 CREATE TABLE "Follow" (
@@ -58,9 +42,6 @@ CREATE TABLE "Comment" (
 );
 
 -- CreateIndex
-CREATE INDEX "ProfileLink_userId_sortOrder_idx" ON "ProfileLink"("userId", "sortOrder");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Follow_followerId_followingId_key" ON "Follow"("followerId", "followingId");
 
 -- CreateIndex
@@ -83,9 +64,6 @@ CREATE INDEX "Comment_imageId_createdAt_idx" ON "Comment"("imageId", "createdAt"
 
 -- CreateIndex
 CREATE INDEX "Comment_userId_idx" ON "Comment"("userId");
-
--- AddForeignKey
-ALTER TABLE "ProfileLink" ADD CONSTRAINT "ProfileLink_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Follow" ADD CONSTRAINT "Follow_followerId_fkey" FOREIGN KEY ("followerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
