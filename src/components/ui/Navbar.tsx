@@ -164,7 +164,7 @@ export default function Navbar({ user }: { user: User | null }) {
                   </Link>
 
                   <Link
-                    href="/settings"
+                    href="/profile/edit"
                     className="navbar__dropdown-item"
                     onClick={() => setOpen(false)}
                   >

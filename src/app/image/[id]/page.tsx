@@ -1,7 +1,7 @@
 import CommentSection from "@/components/ui/CommentSection"
 import DeleteButton from "@/components/ui/DeleteButton"
 import LikeButton from "@/components/ui/LikeButton"
-import { getCurrentUser } from "@/lib/getCurrentUser"
+import { getCurrentNavbarUser } from "@/lib/getCurrentUser"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import "@/styles/image.css"
@@ -16,31 +16,44 @@ export default async function ImagePage(
 ) {
   const { id } = await params
 
-  const image = await prisma.image.findUnique({
-    where: { id },
-    include: {
-      user: true,
-      tags: true,
-      comments: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              image: true,
+  const [image, currentUser] = await Promise.all([
+    prisma.image.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            image: true,
+            bio: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        comments: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                image: true,
+              },
             },
           },
         },
       },
-    },
-  })
+    }),
+    getCurrentNavbarUser(),
+  ])
 
   if (!image) {
     return <div className="profile-empty">Not found</div>
   }
-
-  const currentUser = await getCurrentUser()
 
   const [latestImages, likeCountResult, likedResult] = await Promise.all([
     prisma.image.findMany({
@@ -50,6 +63,12 @@ export default async function ImagePage(
       },
       orderBy: { createdAt: "desc" },
       take: 3,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        imageUrl: true,
+      },
     }),
     prisma.$queryRawUnsafe<Array<{ count: bigint | number }>>(
       `SELECT COUNT(*)::bigint AS count FROM "Like" WHERE "imageId" = $1`,

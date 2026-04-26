@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function LoginForm() {
   const router = useRouter()
@@ -13,6 +13,10 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  useEffect(() => {
+    router.prefetch("/")
+  }, [router])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
@@ -22,6 +26,7 @@ export default function LoginForm() {
     e.preventDefault()
     setLoading(true)
     setError("")
+    let shouldKeepLoading = false
 
     try {
       const res = await fetch("/api/login", {
@@ -36,12 +41,15 @@ export default function LoginForm() {
         throw new Error(data.error || "Login failed")
       }
 
-      router.push("/")
+      shouldKeepLoading = true
+      router.replace("/")
       router.refresh()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred")
     } finally {
-      setLoading(false)
+      if (!shouldKeepLoading) {
+        setLoading(false)
+      }
     }
   }
 

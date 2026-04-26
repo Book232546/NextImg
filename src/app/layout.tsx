@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 import Navbar from "@/components/ui/Navbar";
-import { getCurrentUser } from "@/lib/getCurrentUser";
+import { getCurrentNavbarUser } from "@/lib/getCurrentUser";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +37,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentNavbarUser();
 
   return (
     <html
@@ -50,15 +50,7 @@ export default async function RootLayout({
 
         {/* Navbar */}
         <Navbar
-          user={
-            currentUser
-              ? {
-                  id: currentUser.id,
-                  username: currentUser.username,
-                  image: currentUser.image,
-                }
-              : null
-          }
+          user={currentUser}
         />
 
         <main className="pt-16 px-4">{children}</main>

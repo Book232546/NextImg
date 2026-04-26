@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/getCurrentUser"
+import { getCurrentUserId } from "@/lib/getCurrentUser"
 import { GENDER_OPTIONS } from "@/lib/countries"
 import { getUserProfileById } from "@/lib/userProfile"
 import { prisma } from "@/lib/prisma"
@@ -30,12 +30,18 @@ export default async function ProfilePage(
 ) {
   const { id } = await params
 
-  const [currentUser, user, images, followersCount, followingCount] = await Promise.all([
-    getCurrentUser(),
+  const [currentUserId, user, images, followersCount, followingCount] = await Promise.all([
+    getCurrentUserId(),
     getUserProfileById(id),
     prisma.image.findMany({
       where: { userId: id },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        imageUrl: true,
+      },
     }),
     getFollowCount("followingId", id),
     getFollowCount("followerId", id),
@@ -45,7 +51,7 @@ export default async function ProfilePage(
     return <div className="profile-empty">User not found</div>
   }
 
-  const isOwner = currentUser?.id === user.id
+  const isOwner = currentUserId === user.id
   const genderLabel =
     GENDER_OPTIONS.find((item) => item.value === user.gender)?.label ?? user.gender
   const personalItems = [

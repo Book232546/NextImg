@@ -28,6 +28,21 @@ function parseTags(tagsValue: FormDataEntryValue | null) {
 
 export async function POST(req: Request) {
   try {
+    const missingCloudinaryConfig = [
+      "CLOUDINARY_CLOUD_NAME",
+      "CLOUDINARY_API_KEY",
+      "CLOUDINARY_API_SECRET",
+    ].filter((key) => !process.env[key]);
+
+    if (missingCloudinaryConfig.length > 0) {
+      return Response.json(
+        {
+          error: `Missing Cloudinary environment variables: ${missingCloudinaryConfig.join(", ")}`,
+        },
+        { status: 500 }
+      );
+    }
+
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
