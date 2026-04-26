@@ -1,11 +1,79 @@
 import cloudinary from "@/lib/cloudinary"
 import { COUNTRIES } from "@/lib/countries"
 import { getCurrentUser } from "@/lib/getCurrentUser"
-import { findUserIdByUsername, updateUserProfile } from "@/lib/userProfile"
+import {
+  findUserIdByUsername,
+  type ProfileLinkPlatform,
+  updateUserProfile,
+} from "@/lib/userProfile"
 import type { UploadApiResponse } from "cloudinary"
 
 const GENDERS = new Set(["MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"])
+const PROFILE_LINK_PLATFORMS = new Set(["FACEBOOK", "INSTAGRAM", "X", "PATREON", "KOFI", "OTHER"])
 const COUNTRY_LOOKUP = new Map(COUNTRIES.map((country) => [country.toLowerCase(), country]))
+
+type ProfileLinkInput = {
+  platform: ProfileLinkPlatform
+  label: string | null
+  url: string
+}
+
+function normalizeProfileLinks(value: unknown) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  const normalized: ProfileLinkInput[] = []
+
+  for (const item of value) {
+    if (!item || typeof item !== "object") {
+      continue
+    }
+
+    const platform = String((item as { platform?: unknown }).platform ?? "")
+      .trim()
+      .toUpperCase()
+    const label = String((item as { label?: unknown }).label ?? "").trim()
+    const rawUrl = String((item as { url?: unknown }).url ?? "").trim()
+
+    if (!platform && !label && !rawUrl) {
+      continue
+    }
+
+    if (!PROFILE_LINK_PLATFORMS.has(platform)) {
+      throw new Error("One of the selected link platforms is invalid.")
+    }
+
+    if (!rawUrl) {
+      throw new Error("Each profile link must include a URL.")
+    }
+
+    const candidateUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(rawUrl) ? rawUrl : `https://${rawUrl}`
+
+    let parsed: URL
+    try {
+      parsed = new URL(candidateUrl)
+    } catch {
+      throw new Error("One of the profile links has an invalid URL.")
+    }
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      throw new Error("Profile links must use http or https.")
+    }
+
+    if (platform === "OTHER" && !label) {
+      throw new Error("Custom links need a label so people know where they go.")
+    }
+
+    normalized.push({
+      platform: platform as ProfileLinkPlatform,
+      label: label || null,
+      url: parsed.toString(),
+    })
+  }
+
+  return normalized
+}
 
 export async function PATCH(req: Request) {
   try {
@@ -25,6 +93,7 @@ export async function PATCH(req: Request) {
     let showBirthDate = true
     let showGender = true
     let showCountry = true
+    let profileLinks: ProfileLinkInput[] = []
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData()
@@ -37,6 +106,7 @@ export async function PATCH(req: Request) {
       showBirthDate = String(formData.get("showBirthDate") ?? "false") === "true"
       showGender = String(formData.get("showGender") ?? "false") === "true"
       showCountry = String(formData.get("showCountry") ?? "false") === "true"
+      profileLinks = normalizeProfileLinks(JSON.parse(String(formData.get("profileLinks") ?? "[]")))
 
       const file = formData.get("avatar")
 
@@ -76,6 +146,7 @@ export async function PATCH(req: Request) {
       showBirthDate = Boolean(body.showBirthDate)
       showGender = Boolean(body.showGender)
       showCountry = Boolean(body.showCountry)
+      profileLinks = normalizeProfileLinks(body.profileLinks)
     }
 
     if (!username) {
@@ -117,6 +188,7 @@ export async function PATCH(req: Request) {
       showBirthDate,
       showGender,
       showCountry,
+      profileLinks,
     })
 
     if (!updatedUser) {

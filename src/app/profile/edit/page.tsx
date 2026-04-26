@@ -28,6 +28,7 @@ export default async function EditProfilePage() {
             initialShowBirthDate={currentUser.showBirthDate ?? true}
             initialShowGender={currentUser.showGender ?? true}
             initialShowCountry={currentUser.showCountry ?? true}
+            initialProfileLinks={currentUser.profileLinks}
           />
         </div>
       </div>

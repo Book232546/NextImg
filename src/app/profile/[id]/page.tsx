@@ -5,6 +5,15 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import "@/styles/profile.css"
 
+const PROFILE_LINK_LABELS = {
+  FACEBOOK: "Facebook",
+  INSTAGRAM: "Instagram",
+  X: "X",
+  PATREON: "Patreon",
+  KOFI: "Ko-fi",
+  OTHER: "Link",
+} as const
+
 async function getFollowCount(column: "followingId" | "followerId", userId: string) {
   const safeColumn = column === "followingId" ? '"followingId"' : '"followerId"'
   const result = await prisma.$queryRawUnsafe<Array<{ count: bigint | number }>>(
@@ -62,6 +71,7 @@ export default async function ProfilePage(
       visible: isOwner || user.showCountry,
     },
   ].filter((item) => item.visible && item.value)
+  const visibleProfileLinks = user.profileLinks.filter((link) => Boolean(link.url))
 
   return (
     <section className="profile-shell">
@@ -105,6 +115,27 @@ export default async function ProfilePage(
                         <span className="profile-detail__label">{item.label}</span>
                         <span className="profile-detail__value">{item.value}</span>
                       </div>
+                    ))}
+                  </div>
+                )}
+
+                {visibleProfileLinks.length > 0 && (
+                  <div className="profile-links">
+                    {visibleProfileLinks.map((link) => (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="profile-link-chip"
+                      >
+                        <span className="profile-link-chip__label">
+                          {link.platform === "OTHER"
+                            ? link.label || PROFILE_LINK_LABELS[link.platform]
+                            : PROFILE_LINK_LABELS[link.platform]}
+                        </span>
+                        <span className="profile-link-chip__url">{new URL(link.url).hostname}</span>
+                      </a>
                     ))}
                   </div>
                 )}

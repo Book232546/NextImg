@@ -1,25 +1,17 @@
-import { Prisma } from "@prisma/client"
 import { prisma } from "./prisma"
 
 export type GenderValue = "MALE" | "FEMALE" | "OTHER" | "PREFER_NOT_TO_SAY"
+export type ProfileLinkPlatform = "FACEBOOK" | "INSTAGRAM" | "X" | "PATREON" | "KOFI" | "OTHER"
 
-type UserProfileRow = {
+export type ProfileLink = {
   id: string
-  email: string
-  password: string
-  username: string
-  bio: string | null
-  image: string | null
-  createdAt: Date | string
-  birthDate: Date | string | null
-  gender: GenderValue | null
-  country: string | null
-  showBirthDate: boolean | null
-  showGender: boolean | null
-  showCountry: boolean | null
+  platform: ProfileLinkPlatform
+  label: string | null
+  url: string
+  sortOrder: number
 }
 
-export type UserProfile = {
+type BaseUserProfile = {
   id: string
   email: string
   password: string
@@ -35,63 +27,147 @@ export type UserProfile = {
   showCountry: boolean
 }
 
-function toDate(value: Date | string) {
-  return value instanceof Date ? value : new Date(value)
+export type UserProfile = BaseUserProfile & {
+  profileLinks: ProfileLink[]
 }
 
-function mapUserProfile(row: UserProfileRow): UserProfile {
+type ProfileLinkRow = {
+  id: string
+  platform: ProfileLinkPlatform
+  label: string | null
+  url: string
+  sortOrder: number
+}
+
+type PrismaExecutor = Pick<typeof prisma, "$queryRawUnsafe" | "$executeRawUnsafe">
+
+function mapUserProfile(user: BaseUserProfile, profileLinks: ProfileLink[]): UserProfile {
   return {
-    id: row.id,
-    email: row.email,
-    password: row.password,
-    username: row.username,
-    bio: row.bio,
-    image: row.image,
-    createdAt: toDate(row.createdAt),
-    birthDate: row.birthDate ? toDate(row.birthDate) : null,
-    gender: row.gender ?? "PREFER_NOT_TO_SAY",
-    country: row.country,
-    showBirthDate: row.showBirthDate ?? true,
-    showGender: row.showGender ?? true,
-    showCountry: row.showCountry ?? true,
+    ...user,
+    gender: user.gender ?? "PREFER_NOT_TO_SAY",
+    showBirthDate: user.showBirthDate ?? true,
+    showGender: user.showGender ?? true,
+    showCountry: user.showCountry ?? true,
+    profileLinks,
   }
 }
 
-export async function getUserProfileById(userId: string) {
-  const rows = await prisma.$queryRaw<UserProfileRow[]>(Prisma.sql`
-    SELECT
-      id,
-      email,
-      password,
-      username,
-      bio,
-      image,
-      "createdAt",
-      "birthDate",
-      gender,
-      country,
-      "showBirthDate",
-      "showGender",
-      "showCountry"
-    FROM "User"
-    WHERE id = ${userId}
-    LIMIT 1
-  `)
+function isMissingProfileLinksStorage(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false
+  }
 
-  const row = rows[0]
-  return row ? mapUserProfile(row) : null
+  return (
+    error.message.includes('relation "ProfileLink" does not exist') ||
+    error.message.includes('type "LinkPlatform" does not exist') ||
+    error.message.includes('column "sortOrder" does not exist')
+  )
+}
+
+async function getProfileLinksByUserId(executor: PrismaExecutor, userId: string) {
+  try {
+    const rows = await executor.$queryRawUnsafe<ProfileLinkRow[]>(
+      `SELECT id, platform, label, url, "sortOrder"
+       FROM "ProfileLink"
+       WHERE "userId" = $1
+       ORDER BY "sortOrder" ASC, "createdAt" ASC`,
+      userId
+    )
+
+    return rows.map((row) => ({
+      id: row.id,
+      platform: row.platform,
+      label: row.label,
+      url: row.url,
+      sortOrder: Number(row.sortOrder ?? 0),
+    }))
+  } catch (error) {
+    if (isMissingProfileLinksStorage(error)) {
+      return []
+    }
+
+    throw error
+  }
+}
+
+async function clearProfileLinks(executor: PrismaExecutor, userId: string) {
+  try {
+    await executor.$executeRawUnsafe(`DELETE FROM "ProfileLink" WHERE "userId" = $1`, userId)
+  } catch (error) {
+    if (isMissingProfileLinksStorage(error)) {
+      return false
+    }
+
+    throw error
+  }
+
+  return true
+}
+
+async function insertProfileLinks(
+  executor: PrismaExecutor,
+  userId: string,
+  profileLinks: Array<{
+    platform: ProfileLinkPlatform
+    label: string | null
+    url: string
+  }>
+) {
+  for (const [index, link] of profileLinks.entries()) {
+    await executor.$executeRawUnsafe(
+      `INSERT INTO "ProfileLink" (id, platform, label, url, "sortOrder", "createdAt", "userId")
+       VALUES ($1, CAST($2 AS "LinkPlatform"), $3, $4, $5, NOW(), $6)`,
+      crypto.randomUUID(),
+      link.platform,
+      link.label,
+      link.url,
+      index,
+      userId
+    )
+  }
+}
+
+async function replaceProfileLinks(
+  executor: PrismaExecutor,
+  userId: string,
+  profileLinks: Array<{
+    platform: ProfileLinkPlatform
+    label: string | null
+    url: string
+  }>
+) {
+  const storageReady = await clearProfileLinks(executor, userId)
+
+  if (!storageReady) {
+    return
+  }
+
+  await insertProfileLinks(executor, userId, profileLinks)
+}
+
+export async function getUserProfileById(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!user) {
+    return null
+  }
+
+  const profileLinks = await getProfileLinksByUserId(prisma, userId)
+  return mapUserProfile(user, profileLinks)
 }
 
 export async function findUserIdByUsername(username: string, excludedUserId?: string) {
-  const rows = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-    SELECT id
-    FROM "User"
-    WHERE username = ${username}
-      AND (${excludedUserId ?? null}::text IS NULL OR id <> ${excludedUserId ?? null})
-    LIMIT 1
-  `)
+  const user = await prisma.user.findFirst({
+    where: {
+      username,
+      ...(excludedUserId ? { id: { not: excludedUserId } } : {}),
+    },
+    select: { id: true },
+  })
 
-  return rows[0]?.id ?? null
+  return user?.id ?? null
 }
 
 export async function updateUserProfile(input: {
@@ -105,36 +181,33 @@ export async function updateUserProfile(input: {
   showBirthDate: boolean
   showGender: boolean
   showCountry: boolean
+  profileLinks: Array<{
+    platform: ProfileLinkPlatform
+    label: string | null
+    url: string
+  }>
 }) {
-  const rows = await prisma.$queryRaw<UserProfileRow[]>(Prisma.sql`
-    UPDATE "User"
-    SET
-      username = ${input.username},
-      bio = ${input.bio},
-      image = ${input.image},
-      "birthDate" = ${input.birthDate},
-      gender = CAST(${input.gender} AS "Gender"),
-      country = ${input.country},
-      "showBirthDate" = ${input.showBirthDate},
-      "showGender" = ${input.showGender},
-      "showCountry" = ${input.showCountry}
-    WHERE id = ${input.userId}
-    RETURNING
-      id,
-      email,
-      password,
-      username,
-      bio,
-      image,
-      "createdAt",
-      "birthDate",
-      gender,
-      country,
-      "showBirthDate",
-      "showGender",
-      "showCountry"
-  `)
+  const user = await prisma.$transaction(async (tx) => {
+    const updatedUser = await tx.user.update({
+      where: { id: input.userId },
+      data: {
+        username: input.username,
+        bio: input.bio,
+        image: input.image,
+        birthDate: input.birthDate,
+        gender: input.gender,
+        country: input.country,
+        showBirthDate: input.showBirthDate,
+        showGender: input.showGender,
+        showCountry: input.showCountry,
+      },
+    })
 
-  const row = rows[0]
-  return row ? mapUserProfile(row) : null
+    await replaceProfileLinks(tx, input.userId, input.profileLinks)
+    const profileLinks = await getProfileLinksByUserId(tx, input.userId)
+
+    return mapUserProfile(updatedUser, profileLinks)
+  })
+
+  return user
 }

@@ -19,27 +19,51 @@ enum Gender {
   PREFER_NOT_TO_SAY
 }
 
+enum LinkPlatform {
+  FACEBOOK
+  INSTAGRAM
+  X
+  PATREON
+  KOFI
+  OTHER
+}
+
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  birthDate DateTime?
-  gender    Gender   @default(PREFER_NOT_TO_SAY)
-  country   String?
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  password      String
+  createdAt     DateTime @default(now())
+  birthDate     DateTime?
+  gender        Gender   @default(PREFER_NOT_TO_SAY)
+  country       String?
   showBirthDate Boolean @default(true)
   showGender    Boolean @default(true)
   showCountry   Boolean @default(true)
 
-  image      String?
-  bio        String?
+  image String?
+  bio   String?
 
-  images    Image[]
-  followers Follow[] @relation("UserFollowers")
-  following Follow[] @relation("UserFollowing")
-  likes     Like[]
-  comments  Comment[]
+  images       Image[]
+  followers    Follow[]       @relation("UserFollowers")
+  following    Follow[]       @relation("UserFollowing")
+  likes        Like[]
+  comments     Comment[]
+  profileLinks ProfileLink[]
+}
+
+model ProfileLink {
+  id        String       @id @default(uuid())
+  platform  LinkPlatform
+  label     String?
+  url       String
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sortOrder])
 }
 
 model Image {

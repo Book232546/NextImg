@@ -1,9 +1,17 @@
 "use client"
 
 import { COUNTRIES, GENDER_OPTIONS } from "@/lib/countries"
+import type { ProfileLink, ProfileLinkPlatform } from "@/lib/userProfile"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+
+type EditableProfileLink = {
+  id: string
+  platform: ProfileLinkPlatform
+  label: string
+  url: string
+}
 
 type EditProfileFormProps = {
   userId: string
@@ -16,6 +24,34 @@ type EditProfileFormProps = {
   initialShowBirthDate: boolean
   initialShowGender: boolean
   initialShowCountry: boolean
+  initialProfileLinks: ProfileLink[]
+}
+
+const PLATFORM_OPTIONS: Array<{ value: ProfileLinkPlatform; label: string; placeholder: string }> = [
+  { value: "FACEBOOK", label: "Facebook", placeholder: "facebook.com/your-page" },
+  { value: "INSTAGRAM", label: "Instagram", placeholder: "instagram.com/your-handle" },
+  { value: "X", label: "X", placeholder: "x.com/your-handle" },
+  { value: "PATREON", label: "Patreon", placeholder: "patreon.com/your-name" },
+  { value: "KOFI", label: "Ko-fi", placeholder: "ko-fi.com/your-name" },
+  { value: "OTHER", label: "Other", placeholder: "example.com/contact" },
+]
+
+function createEmptyLink(): EditableProfileLink {
+  return {
+    id: crypto.randomUUID(),
+    platform: "FACEBOOK",
+    label: "",
+    url: "",
+  }
+}
+
+function toEditableLink(link: ProfileLink): EditableProfileLink {
+  return {
+    id: link.id,
+    platform: link.platform,
+    label: link.label ?? "",
+    url: link.url,
+  }
 }
 
 export default function EditProfileForm({
@@ -29,6 +65,7 @@ export default function EditProfileForm({
   initialShowBirthDate,
   initialShowGender,
   initialShowCountry,
+  initialProfileLinks,
 }: EditProfileFormProps) {
   const router = useRouter()
   const [username, setUsername] = useState(initialUsername)
@@ -40,26 +77,52 @@ export default function EditProfileForm({
   const [showBirthDate, setShowBirthDate] = useState(Boolean(initialShowBirthDate))
   const [showGender, setShowGender] = useState(Boolean(initialShowGender))
   const [showCountry, setShowCountry] = useState(Boolean(initialShowCountry))
+  const [profileLinks, setProfileLinks] = useState<EditableProfileLink[]>(
+    initialProfileLinks.map(toEditableLink)
+  )
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (!avatarFile) {
-      setPreviewUrl(null)
-      return
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
     }
-
-    const objectUrl = URL.createObjectURL(avatarFile)
-    setPreviewUrl(objectUrl)
-
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [avatarFile])
+  }, [previewUrl])
 
   const previewImage = useMemo(() => {
     return previewUrl || image || "/default-avatar.svg"
   }, [previewUrl, image])
+
+  const handleProfileLinkChange = (
+    linkId: string,
+    field: keyof Omit<EditableProfileLink, "id">,
+    value: string
+  ) => {
+    setProfileLinks((current) =>
+      current.map((link) => (link.id === linkId ? { ...link, [field]: value } : link))
+    )
+  }
+
+  const addProfileLink = () => {
+    setProfileLinks((current) => [...current, createEmptyLink()])
+  }
+
+  const removeProfileLink = (linkId: string) => {
+    setProfileLinks((current) => current.filter((link) => link.id !== linkId))
+  }
+
+  const handleAvatarChange = (file: File | null) => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
+    setAvatarFile(file)
+    setPreviewUrl(file ? URL.createObjectURL(file) : null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,6 +140,16 @@ export default function EditProfileForm({
       formData.append("showBirthDate", String(showBirthDate))
       formData.append("showGender", String(showGender))
       formData.append("showCountry", String(showCountry))
+      formData.append(
+        "profileLinks",
+        JSON.stringify(
+          profileLinks.map((link) => ({
+            platform: link.platform,
+            label: link.label,
+            url: link.url,
+          }))
+        )
+      )
 
       if (avatarFile) {
         formData.append("avatar", avatarFile)
@@ -94,7 +167,7 @@ export default function EditProfileForm({
       }
 
       setImage(data.image ?? "")
-      setAvatarFile(null)
+      handleAvatarChange(null)
       router.push(`/profile/${userId}`)
       router.refresh()
     } catch (err: unknown) {
@@ -124,7 +197,7 @@ export default function EditProfileForm({
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+            onChange={(e) => handleAvatarChange(e.target.files?.[0] || null)}
             className="profile-edit-form__input profile-edit-form__file"
           />
         </label>
@@ -149,6 +222,83 @@ export default function EditProfileForm({
           placeholder="Tell people a bit about your work."
         />
       </label>
+
+      <div className="profile-edit-form__section">
+        <p className="profile-edit-form__section-title">Social and Donate Links</p>
+        <p className="profile-edit-form__section-subtitle">
+          Add the places where people can follow your work, contact you, or support you directly.
+        </p>
+      </div>
+
+      <div className="profile-edit-form__link-list">
+        {profileLinks.length === 0 && (
+          <div className="profile-edit-form__link-empty">
+            No links yet. Add Facebook, Instagram, X, Patreon, Ko-fi, or any custom link.
+          </div>
+        )}
+
+        {profileLinks.map((link) => {
+          const selectedPlatform =
+            PLATFORM_OPTIONS.find((option) => option.value === link.platform) ?? PLATFORM_OPTIONS[0]
+
+          return (
+            <div key={link.id} className="profile-edit-form__link-card">
+              <div className="profile-edit-form__link-grid">
+                <label className="profile-edit-form__field">
+                  <span className="profile-edit-form__label">Platform</span>
+                  <select
+                    value={link.platform}
+                    onChange={(e) =>
+                      handleProfileLinkChange(link.id, "platform", e.target.value as ProfileLinkPlatform)
+                    }
+                    className="profile-edit-form__input profile-edit-form__select"
+                  >
+                    {PLATFORM_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="profile-edit-form__field">
+                  <span className="profile-edit-form__label">URL</span>
+                  <input
+                    value={link.url}
+                    onChange={(e) => handleProfileLinkChange(link.id, "url", e.target.value)}
+                    className="profile-edit-form__input"
+                    placeholder={selectedPlatform.placeholder}
+                  />
+                </label>
+              </div>
+
+              {link.platform === "OTHER" && (
+                <label className="profile-edit-form__field">
+                  <span className="profile-edit-form__label">Custom Label</span>
+                  <input
+                    value={link.label}
+                    onChange={(e) => handleProfileLinkChange(link.id, "label", e.target.value)}
+                    className="profile-edit-form__input"
+                    placeholder="Discord, Website, Email, Commission Form"
+                  />
+                </label>
+              )}
+
+              <button
+                type="button"
+                onClick={() => removeProfileLink(link.id)}
+                className="profile-edit-form__link-remove"
+              >
+                Remove Link
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      <button type="button" onClick={addProfileLink} className="profile-edit-form__link-add">
+        Add Link
+      </button>
 
       <div className="profile-edit-form__section">
         <p className="profile-edit-form__section-title">Personal Details</p>
