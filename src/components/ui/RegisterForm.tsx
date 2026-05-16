@@ -6,6 +6,7 @@ import { useState } from "react"
 import { COUNTRIES, GENDER_OPTIONS } from "@/lib/countries"
 
 const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+const EMAIL_RULE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -37,6 +38,12 @@ export default function RegisterForm() {
     setLoading(true)
     setError("")
     setSuccess("")
+
+    if (!EMAIL_RULE.test(form.email.trim())) {
+      setError("Invalid Email Format")
+      setLoading(false)
+      return
+    }
 
     if (!PASSWORD_RULE.test(form.password)) {
       setError("Password must be at least 8 characters and include 1 uppercase letter and 1 number.")
@@ -81,7 +88,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="register-form">
+    <form onSubmit={handleSubmit} className="register-form" noValidate>
       <div className="register-form__header">
         <span className="register-form__badge">Join NextImg</span>
         <div>

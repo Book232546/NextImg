@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
 
 const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+const EMAIL_RULE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const GENDERS = new Set(["MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"])
 
 export async function POST(req: Request) {
@@ -17,6 +18,10 @@ export async function POST(req: Request) {
 
     if (!username || !email || !password || !confirmPassword || !birthDateValue || !country) {
       return Response.json({ error: "Please fill in all required fields." }, { status: 400 })
+    }
+
+    if (!EMAIL_RULE.test(email)) {
+      return Response.json({ error: "Invalid Email Format" }, { status: 400 })
     }
 
     if (!PASSWORD_RULE.test(password)) {

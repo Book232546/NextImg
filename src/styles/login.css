@@ -132,6 +132,13 @@
   color: var(--color-text-muted);
 }
 
+.login-form__validation-note {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
 .login-form__message {
   border-radius: 1rem;
   padding: 0.9rem 1rem;
@@ -181,6 +188,18 @@
 .login-form__input:focus {
   border-color: var(--color-border-mid);
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
+}
+
+.login-form__input[aria-invalid="true"] {
+  border-color: rgba(239, 68, 68, 0.55);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+
+.login-form__field-error {
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #ef4444;
 }
 
 .login-form__submit {

@@ -10,6 +10,10 @@ export default function LoginForm() {
     identifier: "",
     password: "",
   })
+  const [fieldErrors, setFieldErrors] = useState({
+    identifier: "",
+    password: "",
+  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -19,11 +23,24 @@ export default function LoginForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    setFieldErrors((prev) => ({ ...prev, [name]: "" }))
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const nextFieldErrors = {
+      identifier: form.identifier.trim() ? "" : "Username or email is required.",
+      password: form.password.trim() ? "" : "Password is required.",
+    }
+
+    setFieldErrors(nextFieldErrors)
+    setError("")
+
+    if (nextFieldErrors.identifier || nextFieldErrors.password) {
+      return
+    }
+
     setLoading(true)
     setError("")
     let shouldKeepLoading = false
@@ -54,13 +71,16 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="login-form">
+    <form onSubmit={handleSubmit} className="login-form" noValidate>
       <div className="login-form__header">
         <span className="login-form__badge">Welcome Back</span>
         <div>
           <h1 className="login-form__title">Sign in</h1>
           <p className="login-form__subtitle">
             Continue building your image collection with NextImg.
+          </p>
+          <p className="login-form__validation-note">
+            System validates and prevents form submission. Error messages shown on required fields.
           </p>
         </div>
       </div>
@@ -76,7 +96,11 @@ export default function LoginForm() {
             onChange={handleChange}
             placeholder="yourname@example.com"
             className="login-form__input"
+            aria-invalid={Boolean(fieldErrors.identifier)}
           />
+          {fieldErrors.identifier && (
+            <span className="login-form__field-error">{fieldErrors.identifier}</span>
+          )}
         </label>
 
         <label className="login-form__field">
@@ -88,7 +112,11 @@ export default function LoginForm() {
             onChange={handleChange}
             placeholder="Enter your password"
             className="login-form__input"
+            aria-invalid={Boolean(fieldErrors.password)}
           />
+          {fieldErrors.password && (
+            <span className="login-form__field-error">{fieldErrors.password}</span>
+          )}
         </label>
       </div>
 
