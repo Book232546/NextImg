@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
+import RandomCharacterPrompt from "@/components/ui/RandomCharacterPrompt"
 import "@/styles/home.css"
 
 export default async function Home() {
@@ -76,6 +77,8 @@ export default async function Home() {
           </div>
         )}
       </main>
+
+      <RandomCharacterPrompt />
 
       {/* Footer */}
       <footer className="gallery-footer">

@@ -153,6 +153,215 @@
   text-transform: uppercase;
 }
 
+.random-draw {
+  padding: 0 2rem;
+  margin-top: 2rem;
+}
+
+.random-draw__panel {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(135deg, var(--color-surface), color-mix(in srgb, var(--color-surface) 80%, transparent));
+  display: grid;
+  gap: 1rem;
+}
+
+.random-draw__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 360px);
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.random-draw__copy {
+  display: grid;
+  gap: 1rem;
+}
+
+.random-draw__summary {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.random-draw__filters {
+  display: grid;
+  gap: 1rem;
+}
+
+.random-draw__filter-group {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.random-draw__filter-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.random-draw__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.random-draw__chip {
+  padding: 0.7rem 0.95rem;
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--color-text-soft);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.random-draw__chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-border-mid);
+}
+
+.random-draw__chip--active {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--background);
+}
+
+.random-draw__eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.random-draw__title {
+  margin: 0;
+  max-width: 28rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  color: var(--color-text);
+}
+
+.random-draw__prompt {
+  margin: 0;
+  max-width: 40rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--surface-muted);
+  color: var(--color-text);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.random-draw__game {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.random-draw__button {
+  width: fit-content;
+  padding: 0.9rem 1.25rem;
+  border: 1px solid var(--color-border-mid);
+  border-radius: 9999px;
+  background: var(--color-text);
+  color: var(--background);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.random-draw__image-wrap {
+  min-height: 360px;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.random-draw__image {
+  width: 100%;
+  max-width: 280px;
+  max-height: 420px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.22));
+}
+
+.random-draw__empty,
+.random-draw__image-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.random-draw__image-empty {
+  text-align: center;
+}
+
+.random-draw__button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.random-draw__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.random-draw__button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .random-draw {
+    padding: 0 1rem;
+  }
+
+  .random-draw__panel {
+    padding: 1.4rem;
+    border-radius: 1.1rem;
+  }
+
+  .random-draw__content {
+    grid-template-columns: 1fr;
+  }
+
+  .random-draw__image-wrap {
+    order: -1;
+    min-height: 280px;
+  }
+
+  .random-draw__button {
+    width: 100%;
+  }
+}
+
 /* ============================================================
    PAGE — Footer
    ============================================================ */

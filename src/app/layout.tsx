@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "@/app/globals.css";
 import Navbar from "@/components/ui/Navbar";
 import { getCurrentNavbarUser } from "@/lib/getCurrentUser";
@@ -46,7 +47,9 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen">
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
 
         {/* Navbar */}
         <Navbar
