@@ -1,17 +1,11 @@
-import { cookies } from "next/headers"
+import { getCurrentNavbarUser } from "@/lib/getCurrentUser"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import RandomCharacterPrompt from "@/components/ui/RandomCharacterPrompt"
 import "@/styles/home.css"
 
 export default async function Home() {
-  const cookieStore = await cookies()
-  const userId = cookieStore.get("userId")?.value
-
-  let user = null
-  if (userId) {
-    user = await prisma.user.findUnique({ where: { id: userId } })
-  }
+  const user = await getCurrentNavbarUser()
 
   const images = await prisma.image.findMany({
     include: { user: true },

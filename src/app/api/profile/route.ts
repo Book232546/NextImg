@@ -18,6 +18,21 @@ type ProfileLinkInput = {
   url: string
 }
 
+function serializeProfile(user: Awaited<ReturnType<typeof getCurrentUser>>) {
+  if (!user) {
+    return null
+  }
+
+  const { password, createdAt, birthDate, ...rest } = user
+  void password
+
+  return {
+    ...rest,
+    createdAt: createdAt.toISOString(),
+    birthDate: birthDate ? birthDate.toISOString() : null,
+  }
+}
+
 function normalizeProfileLinks(value: unknown) {
   if (!Array.isArray(value)) {
     return []
@@ -73,6 +88,21 @@ function normalizeProfileLinks(value: unknown) {
   }
 
   return normalized
+}
+
+export async function GET() {
+  try {
+    const currentUser = await getCurrentUser()
+
+    if (!currentUser) {
+      return Response.json({ error: "Please sign in first." }, { status: 401 })
+    }
+
+    return Response.json(serializeProfile(currentUser))
+  } catch (error) {
+    console.error("Profile API error:", error)
+    return Response.json({ error: "Unable to load profile right now." }, { status: 500 })
+  }
 }
 
 export async function PATCH(req: Request) {
@@ -195,7 +225,7 @@ export async function PATCH(req: Request) {
       return Response.json({ error: "User not found." }, { status: 404 })
     }
 
-    return Response.json(updatedUser)
+    return Response.json(serializeProfile(updatedUser))
   } catch (error) {
     console.error("Profile API error:", error)
     const message =

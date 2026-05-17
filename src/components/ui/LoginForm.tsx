@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { AUTH_STORAGE_KEY } from "@/lib/authShared"
 
 export default function LoginForm() {
   const router = useRouter()
@@ -56,6 +57,10 @@ export default function LoginForm() {
 
       if (!res.ok) {
         throw new Error(data.error || "Login failed")
+      }
+
+      if (typeof window !== "undefined" && data.token) {
+        window.localStorage.setItem(AUTH_STORAGE_KEY, data.token)
       }
 
       shouldKeepLoading = true

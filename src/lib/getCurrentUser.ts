@@ -1,21 +1,21 @@
-import { cookies } from "next/headers"
 import { prisma } from "./prisma"
+import { getCurrentSession } from "./authSession"
 import { getUserProfileById } from "./userProfile"
 
 export async function getCurrentUserId() {
-  const cookieStore = await cookies()
-  return cookieStore.get("userId")?.value ?? null
+  const session = await getCurrentSession()
+  return session?.userId ?? null
 }
 
 export async function getCurrentNavbarUser() {
-  const userId = await getCurrentUserId()
+  const session = await getCurrentSession()
 
-  if (!userId) {
+  if (!session) {
     return null
   }
 
   return prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.userId },
     select: {
       id: true,
       username: true,

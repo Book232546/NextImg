@@ -1,16 +1,23 @@
 "use client"
 
+import { AUTH_STORAGE_KEY } from "@/lib/authShared"
 import { useRouter } from "next/navigation"
 
 export default function LogoutButton() {
   const router = useRouter()
 
   const handleLogout = async () => {
-    await fetch("/api/logout", {
-      method: "POST"
+    const token = window.localStorage.getItem(AUTH_STORAGE_KEY)
+    const res = await fetch("/api/logout", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
 
-    router.refresh() // รีโหลด server component
+    if (res.ok) {
+      window.localStorage.removeItem(AUTH_STORAGE_KEY)
+    }
+
+    router.refresh()
   }
 
   return (

@@ -1,6 +1,6 @@
 import cloudinary from "@/lib/cloudinary";
+import { getCurrentUserId } from "@/lib/getCurrentUser";
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
 import type { UploadApiResponse } from "cloudinary";
 
 function parseTags(tagsValue: FormDataEntryValue | null) {
@@ -43,11 +43,19 @@ export async function POST(req: Request) {
       );
     }
 
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
+    const userId = await getCurrentUserId();
 
     if (!userId) {
       return Response.json({ error: "Please sign in before uploading." }, { status: 401 });
+    }
+
+    const contentType = req.headers.get("content-type") ?? "";
+
+    if (!contentType.toLowerCase().includes("multipart/form-data")) {
+      return Response.json(
+        { error: "Upload request must use multipart/form-data." },
+        { status: 400 }
+      );
     }
 
     const formData = await req.formData();
@@ -113,6 +121,19 @@ export async function POST(req: Request) {
     return Response.json(image);
   } catch (error) {
     console.error("Upload API error:", error);
+
+    if (
+      error instanceof TypeError &&
+      error.message.includes("Failed to parse body as FormData")
+    ) {
+      return Response.json(
+        {
+          error:
+            "Invalid multipart/form-data request. In Postman, use Body > form-data and do not set the Content-Type header manually.",
+        },
+        { status: 400 }
+      );
+    }
 
     const message =
       error instanceof Error ? error.message : "An error occurred while uploading.";

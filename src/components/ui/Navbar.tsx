@@ -1,5 +1,6 @@
 "use client"
 
+import { AUTH_STORAGE_KEY } from "@/lib/authShared"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -85,7 +86,16 @@ export default function Navbar({ user }: { user: User | null }) {
   }
 
   const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST" })
+    const token = window.localStorage.getItem(AUTH_STORAGE_KEY)
+    const res = await fetch("/api/logout", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+
+    if (res.ok) {
+      window.localStorage.removeItem(AUTH_STORAGE_KEY)
+    }
+
     router.push("/")
     router.refresh()
   }

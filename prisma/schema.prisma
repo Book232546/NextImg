@@ -50,6 +50,20 @@ model User {
   likes        Like[]
   comments     Comment[]
   profileLinks ProfileLink[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model ProfileLink {
